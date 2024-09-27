@@ -6,7 +6,6 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const accountService = inject(AccountService);
 
   if(accountService.currentUser()){
-    console.log('praseee');
     req = req.clone({
       setHeaders:{
         Authorization: `Bearer ${accountService.currentUser()?.token}`

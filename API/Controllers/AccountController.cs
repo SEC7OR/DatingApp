@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-public class AccountController:BaseApiController
+public class AccountController : BaseApiController
 {
     private readonly DataContext context;
     private readonly ITokenService tokenService;
@@ -24,9 +24,9 @@ public class AccountController:BaseApiController
     [HttpPost("register")]
     public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDto)
     {
-        if(await UserExists(registerDto.Username))
+        if (await UserExists(registerDto.Username))
         {
-            return BadRequest("Username is taken");    
+            return BadRequest("Username is taken");
         }
         return Ok();
         // using var hmac = new HMACSHA512();
@@ -52,8 +52,10 @@ public class AccountController:BaseApiController
     [HttpPost("login")]
     public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDto)
     {
-        var user = await this.context.Users.FirstOrDefaultAsync(u=>u.UserName == loginDto.Username.ToLower());
-        if(user == null)
+        var user = await this.context.Users
+        .Include(u => u.Photos)
+        .FirstOrDefaultAsync(u => u.UserName == loginDto.Username.ToLower());
+        if (user == null)
         {
             return Unauthorized("Invalid username or password");
         }
@@ -62,9 +64,9 @@ public class AccountController:BaseApiController
 
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
 
-        for(int i = 0;i <computedHash.Length;i++)
+        for (int i = 0; i < computedHash.Length; i++)
         {
-            if(computedHash[i] != user.PasswordHash[i])
+            if (computedHash[i] != user.PasswordHash[i])
             {
                 return Unauthorized("Invalid username or password");
             }
@@ -72,13 +74,15 @@ public class AccountController:BaseApiController
         var userDto = new UserDTO
         {
             Username = user.UserName,
-            Token = tokenService.CreateToken(user)
+            Token = tokenService.CreateToken(user),
+            PhotoUrl = user.Photos.FirstOrDefault(p => p.IsMain)?.Url
         };
 
         return Ok(userDto);
     }
 
-    private async Task<bool> UserExists(string username){
-        return await this.context.Users.AnyAsync(u=>u.UserName.ToLower() == username.ToLower());
+    private async Task<bool> UserExists(string username)
+    {
+        return await this.context.Users.AnyAsync(u => u.UserName.ToLower() == username.ToLower());
     }
 }
