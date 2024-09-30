@@ -1,5 +1,6 @@
 using API.DTOs;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using API.Models;
 using AutoMapper;
@@ -20,9 +21,13 @@ public class UsersController : BaseApiController
         this.photoService = photoService;
     }
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers([FromQuery] UserParams userParams)
     {
-        var users = await this.userRepository.GetMembersAsync();
+        userParams.CurrentUsername = User.GetUsername();
+        var users = await this.userRepository.GetMembersAsync(userParams);
+
+        Response.AddPaginationHeader(users);
+
         return Ok(users);
     }
     [HttpGet("{username}")]

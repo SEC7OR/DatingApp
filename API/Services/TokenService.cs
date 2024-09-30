@@ -17,7 +17,7 @@ public class TokenService : ITokenService
     public string CreateToken(AppUser user)
     {
         var tokenKey = config["TokenKey"] ?? throw new Exception("Cannot access tokenKey from appsettings");
-        if(tokenKey.Length <64) 
+        if (tokenKey.Length < 64)
         {
             throw new Exception("Your tokenKey needs to be longer");
         }
@@ -25,10 +25,11 @@ public class TokenService : ITokenService
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.UserName)
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName)
         };
 
-        var creds = new SigningCredentials(key,SecurityAlgorithms.HmacSha512Signature);
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
