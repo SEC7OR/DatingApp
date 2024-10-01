@@ -83,7 +83,7 @@ public class UsersController : BaseApiController
             PublicId = result.PublicId
         };
 
-        if(user.Photos.Count == 0)
+        if (user.Photos.Count == 0)
         {
             photo.IsMain = true;
         }
