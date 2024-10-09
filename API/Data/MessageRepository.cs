@@ -84,8 +84,8 @@ public class MessageRepository : IMessageRepository
         var query = context.Messages
             .Where(m => m.RecipientUsername == currentUsername
                 && m.RecipientDeleted == false
-                && m.SenderUsername == recipientUsername ||
-                m.SenderUsername == currentUsername
+                && m.SenderUsername == recipientUsername
+                || m.SenderUsername == currentUsername
                 && m.SenderDeleted == false
                 && m.RecipientUsername == recipientUsername)
             .OrderBy(m => m.MessageSent)
